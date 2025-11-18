@@ -1,31 +1,38 @@
 from flask import Flask, request, Response
 from PIL import Image
 import io
+import os
 
 app = Flask(__name__)
 
-MOODLE_LOGIN = "vulkan21"
+MOODLE_LOGIN = os.environ.get("MOODLE_LOGIN", "your_login_here")
+
 
 @app.route("/login")
-def login():
+def login() -> str:
+    """Return the configured Moodle login string."""
     return MOODLE_LOGIN
 
+
 @app.route("/makeimage")
-def make_image():
-      try:
-        width = int(request.args.get("width", "0"))
-        height = int(request.args.get("height", "0"))
+def make_image() -> Response:
+    """Return a PNG image with the requested dimensions."""
+    width_arg = request.args.get("width")
+    height_arg = request.args.get("height")
+
+    try:
+        width = int(width_arg)
+        height = int(height_arg)
         if width <= 0 or height <= 0:
             raise ValueError
-    except ValueError:
-        return "Invalid width or height", 400
+    except (TypeError, ValueError):
+        return "width and height must be positive integers", 400
 
-       image = Image.new("RGB", (width, height), (255, 255, 255))
-    buf = io.BytesIO()
-    image.save(buf, format="PNG")
-    png_bytes = buf.getvalue()
+    image = Image.new("RGB", (width, height), color=(255, 255, 255))
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
 
-    return Response(png_bytes, mimetype="image/png")
+    return Response(buffer.getvalue(), mimetype="image/png")
 
 
 if __name__ == "__main__":
