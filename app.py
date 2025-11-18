@@ -5,7 +5,7 @@ import os
 
 app = Flask(__name__)
 
-MOODLE_LOGIN = os.environ.get("MOODLE_LOGIN", "your_login_here")
+MOODLE_LOGIN = os.environ.get("MOODLE_LOGIN", "vulkan21")
 
 
 @app.route("/login")
